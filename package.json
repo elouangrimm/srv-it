@@ -1,5 +1,5 @@
 {
-  "name": "@elouangrimm/srv-it",
+  "name": "srv-it",
   "version": "0.1.0",
   "description": "Static server with polished CLI UI, directory listing, and live reload",
   "keywords": [
@@ -22,7 +22,7 @@
   "type": "commonjs",
   "main": "./src/cli.js",
   "bin": {
-    "srv": "bin/srv.js"
+    "srv-it": "bin/srv.js"
   },
   "files": [
     "bin",
