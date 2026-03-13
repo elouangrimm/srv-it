@@ -1,6 +1,6 @@
 {
   "name": "srv-it",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Static server with polished CLI UI, directory listing, and live reload",
   "keywords": [
     "server",
