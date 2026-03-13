@@ -1,0 +1,54 @@
+{
+  "name": "@elouangrimm/srv-it",
+  "version": "0.1.0",
+  "description": "Static server with polished CLI UI, directory listing, and live reload",
+  "keywords": [
+    "server",
+    "static",
+    "live-reload",
+    "directory-listing",
+    "cli"
+  ],
+  "homepage": "https://github.com/elouan/srv-it",
+  "bugs": {
+    "url": "https://github.com/elouan/srv-it/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/elouan/srv-it.git"
+  },
+  "license": "MIT",
+  "author": "Elouan Grimm",
+  "type": "commonjs",
+  "main": "./src/cli.js",
+  "bin": {
+    "srv": "bin/srv.js"
+  },
+  "files": [
+    "bin",
+    "src",
+    "README.md"
+  ],
+  "scripts": {
+    "start": "node ./bin/srv.js",
+    "test": "node ./bin/srv.js --help"
+  },
+  "dependencies": {
+    "arg": "^5.0.2",
+    "boxen": "^7.1.1",
+    "chalk": "^4.1.2",
+    "chokidar": "^3.6.0",
+    "compression": "^1.8.1",
+    "mime-types": "^2.1.35",
+    "open": "^10.1.2",
+    "ws": "^8.18.0"
+  },
+  "devDependencies": {},
+  "engines": {
+    "node": ">=18"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "preferGlobal": true
+}
