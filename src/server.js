@@ -239,7 +239,7 @@ function renderDirListing({ pathnameValue, entries, style, customCss }) {
 </head>
 <body>
   <main>
-    <h1>srv</h1>
+    <h1>srv-it</h1>
     <div class="path">Index of ${base}</div>
     ${up}
     <ul>${list}</ul>
