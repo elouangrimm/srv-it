@@ -27,7 +27,8 @@
   "files": [
     "bin",
     "src",
-    "README.md"
+    "README.md",
+    "srv.config.example.json"
   ],
   "scripts": {
     "start": "node ./bin/srv.js",
