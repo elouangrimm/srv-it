@@ -1,6 +1,10 @@
 # srv-it
 
-`srv-it` installs a `srv` command and merges the best parts of `live-server` and `serve`:
+[![NPM Last Update](https://img.shields.io/npm/last-update/srv-it)](https://www.npmjs.com/package/srv-it?activeTab=versions) [![NPM Downloads](https://img.shields.io/npm/dm/srv-it?logo=npm)](https://www.npmjs.com/package/srv-it) [![install size](https://packagephobia.com/badge?p=srv-it)](https://packagephobia.com/result?p=srv-it) [![NPM Version](https://img.shields.io/npm/v/srv-it)](https://www.npmjs.com/package/srv-it)
+
+[![elouan.xyz](https://img.shields.io/badge/elouan-dot%20xyz-3b82f6)](https://elouan.xyz)
+
+`srv-it` installs a `srv` command and merges the best parts of [live-server](https://www.npmjs.com/package/live-server) and [serve](https://www.npmjs.com/package/serve):
 
 - one-command static server from any folder
 - polished terminal UX
