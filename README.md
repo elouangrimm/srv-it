@@ -4,7 +4,7 @@
 
 [![elouan.xyz](https://img.shields.io/badge/elouan-dot%20xyz-3b82f6)](https://elouan.xyz)
 
-`srv-it` installs a `srv` command and merges the best parts of [live-server](https://www.npmjs.com/package/live-server) and [serve](https://www.npmjs.com/package/serve):
+`srv-it` is a simple cli that merges the best parts of [live-server](https://www.npmjs.com/package/live-server) and [serve](https://www.npmjs.com/package/serve):
 
 - one-command static server from any folder
 - polished terminal UX
@@ -22,7 +22,7 @@ Then run:
 
 ```bash
 cd your-project
-srv
+srv-it
 ```
 
 This serves the current directory on port `3000`.
@@ -30,11 +30,11 @@ This serves the current directory on port `3000`.
 ## Common usage
 
 ```bash
-srv
-srv 3000
-srv 8080 ./public
-srv ./public --open
-srv --style neon --style-css ./srv-listing.css
+srv-it
+srv-it 3000
+srv-it 8080 ./public
+srv-it ./public --open
+srv-it --style neon --style-css ./srv-listing.css
 ```
 
 ## Config defaults
@@ -71,7 +71,7 @@ CLI flags always override config files.
 Run:
 
 ```bash
-srv --help
+srv-it --help
 ```
 
 Highlights:
