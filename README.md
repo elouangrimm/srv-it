@@ -97,3 +97,5 @@ Highlights:
 - HTML pages get an auto-injected websocket client for live reload.
 - CSS changes refresh styles without full page reload unless `--no-css-inject` is enabled.
 - If a folder has `index.html`, that file is served; otherwise a styled directory listing is shown.
+- Watch mode always ignores `.git` and `node_modules`, and also skips common home cache/config paths (`~/.cache`, `~/.local/share`).
+- If the OS watcher limit is reached (`ENOSPC`), srv-it keeps serving files and disables live reload instead of crashing.

@@ -11,6 +11,21 @@ const os = require('node:os');
 const chalk = require('chalk');
 const { WebSocketServer } = require('ws');
 
+const BASE_WATCH_IGNORES = ['**/.git/**', '**/node_modules/**'];
+
+function toGlobPath(value) {
+  return value.replace(/\\/g, '/');
+}
+
+function getDefaultWatchIgnores() {
+  const home = toGlobPath(os.homedir());
+  return [
+    ...BASE_WATCH_IGNORES,
+    `${home}/.cache/**`,
+    `${home}/.local/share/**`,
+  ];
+}
+
 const LIVE_RELOAD_SNIPPET = `\n<script>\n(function(){\n  if(!('WebSocket' in window)) return;\n  function refreshCSS(){\n    var links=[].slice.call(document.querySelectorAll('link[rel="stylesheet"],link:not([rel])'));\n    links.forEach(function(link){\n      var href=link.getAttribute('href');\n      if(!href) return;\n      var u=href.replace(/([?&])_srv=\\d+/,'').replace(/[?&]$/,'');\n      var join=u.indexOf('?')>-1?'&':'?';\n      link.setAttribute('href',u+join+'_srv='+Date.now());\n    });\n  }\n  var proto=location.protocol==='https:'?'wss':'ws';\n  var socket=new WebSocket(proto+'://'+location.host+'/__srv_ws');\n  socket.onmessage=function(event){\n    if(event.data==='refreshcss') refreshCSS();\n    if(event.data==='reload') location.reload();\n  };\n})();\n</script>\n`;
 
 const STYLE_PRESETS = {
@@ -428,12 +443,29 @@ async function createSrvServer(options) {
   });
 
   const watchPaths = [root, ...(options.watch || []).map((x) => path.resolve(x))];
+  const ignore = [...getDefaultWatchIgnores(), ...((options.ignore || []).filter(Boolean))];
   const watcher = chokidar.watch(watchPaths, {
     ignoreInitial: true,
-    ignored: options.ignore && options.ignore.length > 0 ? options.ignore : undefined,
+    ignored: Array.from(new Set(ignore)),
+    ignorePermissionErrors: true,
   });
 
+  let liveReloadEnabled = true;
+  let watcherClosed = false;
+
+  const closeWatcher = async () => {
+    if (watcherClosed) {
+      return;
+    }
+    watcherClosed = true;
+    await watcher.close();
+  };
+
   const sendReload = (changePath) => {
+    if (!liveReloadEnabled) {
+      return;
+    }
+
     const isCss = path.extname(changePath).toLowerCase() === '.css' && !options.noCssInject;
     const message = isCss ? 'refreshcss' : 'reload';
     for (const client of clients) {
@@ -451,9 +483,22 @@ async function createSrvServer(options) {
   watcher.on('unlink', sendReload);
   watcher.on('addDir', sendReload);
   watcher.on('unlinkDir', sendReload);
+  watcher.on('error', async (error) => {
+    if (error && error.code === 'ENOSPC') {
+      liveReloadEnabled = false;
+      await closeWatcher();
+      console.error('[srv] live reload disabled: file watcher limit reached (ENOSPC).');
+      console.error('[srv] use --ignore to exclude noisy paths, or raise inotify limits on Linux.');
+      return;
+    }
+
+    if (options.logLevel >= 1) {
+      console.error(`[srv] watcher error: ${error.message}`);
+    }
+  });
 
   const closeAll = async () => {
-    await watcher.close();
+    await closeWatcher();
     wss.close();
     await new Promise((resolve) => server.close(resolve));
   };
