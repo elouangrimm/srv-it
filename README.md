@@ -74,23 +74,24 @@ Run:
 srv-it --help
 ```
 
-Highlights:
+### Supported Arguments
 
-- `-p, --port <number>`
-- `--host <host>`
-- `--open [path]`, `--no-open`
-- `--watch <path>` (repeat)
-- `--ignore <glob>` (repeat)
-- `--single`
-- `--cors`
-- `--no-css-inject`
-- `--no-dir-listing`
-- `--style <midnight|paper|neon>`
-- `--style-css <file>`
-- `-c` (create `srv.config.json` in served root if missing)
-- `--log-level <0-3>`
-- `--no-request-logging`
-- `--ssl-cert <file> --ssl-key <file> [--ssl-pass <file>]`
+- **`-p, --port <number>`**: set a custom port to serve the site
+- **`--host <host>`**: set the bind host (default: `0.0.0.0`)
+- **`--open [path]`**, **`--no-open`**: open a browser at `/` (or the given path), or disable opening
+- **`--watch <path>`** (repeat): add extra file/folder paths to watch for live reload
+- **`--ignore <glob>`** (repeat): ignore matching files/folders from watcher reload triggers
+- **`--single`**: enable SPA fallback by serving `index.html` for unknown routes
+- **`--cors`**: enable CORS headers on responses
+- **`--no-css-inject`**: disable hot CSS injection and force full page reload on CSS changes
+- **`--no-dir-listing`**: disable generated directory listing pages
+- **`--style <midnight|paper|neon>`**: choose the directory listing preset theme
+- **`--style-css <file>`**: load a custom CSS file for directory listing pages
+- **`-c`**: create `srv.config.json` in served root if missing
+- **`--config <path>`**: Provide a custom config file
+- **`--log-level <0-3>`**: set startup log verbosity (`0` silent, `3` most verbose)
+- **`--no-request-logging`**: disable per-request logging output
+- **`--ssl-cert <file> --ssl-key <file> [--ssl-pass <file>]`**: enable HTTPS with cert/key and optional passphrase file
 
 ## Notes
 
