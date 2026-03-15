@@ -11,6 +11,14 @@ const os = require('node:os');
 const chalk = require('chalk');
 const { WebSocketServer } = require('ws');
 
+const srvLogger = {
+  http: (...message) => console.info(chalk.bgBlue.bold(' HTTP '), ...message),
+  info: (...message) => console.info(chalk.bgMagenta.bold(' INFO '), ...message),
+  warn: (...message) => console.error(chalk.bgYellow.bold(' WARN '), ...message),
+  error: (...message) => console.error(chalk.bgRed.bold(' ERROR '), ...message),
+  log: console.log,
+};
+
 const BASE_WATCH_IGNORES = ['**/.git/**', '**/node_modules/**'];
 
 const DIRECTORY_FAVICON_SVG = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="#0c0a09" d="M3 5.5A2.5 2.5 0 0 1 5.5 3H10l2 2h6.5A2.5 2.5 0 0 1 21 7.5v9A2.5 2.5 0 0 1 18.5 19h-13A2.5 2.5 0 0 1 3 16.5z"/><path fill="#3b82f6" d="M3 8h18v8.5a2.5 2.5 0 0 1-2.5 2.5h-13A2.5 2.5 0 0 1 3 16.5z"/></svg>';
@@ -389,7 +397,7 @@ async function createSrvServer(options) {
       res.statusCode = 500;
       res.end('Internal server error');
       if (options.logLevel >= 1) {
-        console.error('[srv] request error:', error.message);
+        srvLogger.error('[srv] request error:', error.message);
       }
     } finally {
       if (!options.noRequestLogging) {
@@ -400,7 +408,7 @@ async function createSrvServer(options) {
         const formattedTime = `${now.toLocaleDateString()} ${now.toLocaleTimeString()}`;
         const methodColor = method === 'GET' ? 'cyan' : 'magenta';
 
-        console.log(
+        srvLogger.http(
           chalk.dim(formattedTime),
           chalk.yellow(sourceIp),
           chalk[methodColor](`${method} ${pathnameValue}`),
@@ -424,7 +432,7 @@ async function createSrvServer(options) {
         res.statusCode = 500;
         res.end('Internal server error');
         if (options.logLevel >= 1) {
-          console.error('[srv] handler error:', error.message);
+          srvLogger.error('[srv] handler error:', error.message);
         }
       });
     });
@@ -434,7 +442,7 @@ async function createSrvServer(options) {
         res.statusCode = 500;
         res.end('Internal server error');
         if (options.logLevel >= 1) {
-          console.error('[srv] handler error:', error.message);
+          srvLogger.error('[srv] handler error:', error.message);
         }
       });
     });
@@ -478,7 +486,7 @@ async function createSrvServer(options) {
       }
     }
     if (options.logLevel >= 2) {
-      console.log(`[srv] ${isCss ? 'css refresh' : 'reload'}: ${changePath}`);
+      srvLogger.info(`[srv] ${isCss ? 'css refresh' : 'reload'}: ${changePath}`);
     }
   };
 
@@ -491,13 +499,13 @@ async function createSrvServer(options) {
     if (error && error.code === 'ENOSPC') {
       liveReloadEnabled = false;
       await closeWatcher();
-      console.error('[srv] live reload disabled: file watcher limit reached (ENOSPC).');
-      console.error('[srv] use --ignore to exclude noisy paths, or raise inotify limits on Linux.');
+      srvLogger.error('[srv] live reload disabled: file watcher limit reached (ENOSPC).');
+      srvLogger.warn('[srv] use --ignore to exclude noisy paths, or raise inotify limits on Linux.');
       return;
     }
 
     if (options.logLevel >= 1) {
-      console.error(`[srv] watcher error: ${error.message}`);
+      srvLogger.error(`[srv] watcher error: ${error.message}`);
     }
   });
 
@@ -508,7 +516,7 @@ async function createSrvServer(options) {
   };
 
   process.on('SIGINT', async () => {
-    console.log('\n[srv] shutting down...');
+    srvLogger.info('\n[srv] shutting down...');
     await closeAll();
     process.exit(0);
   });

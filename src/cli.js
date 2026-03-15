@@ -230,7 +230,8 @@ async function run() {
       boxen(content, {
         padding: 1,
         borderStyle: 'single',
-        borderColor: 'cyan',
+        borderColor: '#3b82f6',
+        margin: 1,
       }),
     );
   }
