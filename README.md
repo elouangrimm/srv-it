@@ -9,7 +9,7 @@
 - one-command static server from any folder
 - polished terminal UX
 - live DOM reload and CSS refresh
-- directory listing with customizable page style
+- directory listing with customizable page styles
 - simple defaults via config files
 
 ## Quick start
