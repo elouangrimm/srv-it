@@ -42,15 +42,29 @@ const LIVE_RELOAD_SNIPPET = `\n<script>\n(function(){\n  if(!('WebSocket' in win
 const STYLE_PRESETS = {
   midnight: {
     accent: '#3b82f6',
+    accentSoft: 'rgba(59, 130, 246, 0.16)',
+    bg: '#0c0a09',
+    bgRaised: '#1c1917',
+    bgSurface: '#292524',
+    border: '#292524',
     borderStrong: '#78716c',
+    text: '#e7e5e4',
+    textMuted: '#a8a29e',
+    textFaint: '#78716c',
+    textBright: '#f5f5f4',
   },
   paper: {
-    accent: '#f59e0b',
+    accent: '#d97706',
+    accentSoft: 'rgba(217, 119, 6, 0.16)',
+    bg: '#f5f5f4',
+    bgRaised: '#fafaf9',
+    bgSurface: '#e7e5e4',
+    border: '#d6d3d1',
     borderStrong: '#a8a29e',
-  },
-  neon: {
-    accent: '#22c55e',
-    borderStrong: '#a8a29e',
+    text: '#292524',
+    textMuted: '#57534e',
+    textFaint: '#78716c',
+    textBright: '#1c1917',
   },
 };
 
@@ -132,16 +146,17 @@ function renderDirListing({ pathnameValue, entries, style, customCss }) {
       --stone-900: #1c1917;
       --stone-950: #0c0a09;
 
-      --bg: var(--stone-950);
-      --bg-raised: var(--stone-900);
-      --bg-surface: var(--stone-800);
-      --border: var(--stone-800);
+      --bg: ${palette.bg};
+      --bg-raised: ${palette.bgRaised};
+      --bg-surface: ${palette.bgSurface};
+      --border: ${palette.border};
       --border-strong: ${palette.borderStrong};
-      --text: var(--stone-200);
-      --text-muted: var(--stone-400);
-      --text-faint: var(--stone-500);
-      --text-bright: var(--stone-100);
+      --text: ${palette.text};
+      --text-muted: ${palette.textMuted};
+      --text-faint: ${palette.textFaint};
+      --text-bright: ${palette.textBright};
       --accent: ${palette.accent};
+      --accent-soft: ${palette.accentSoft};
       --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
       --font-mono: "JetBrains Mono", "SF Mono", "Fira Code", "Roboto Mono", "Cascadia Code", monospace;
       --line-height: 1.6;
@@ -175,7 +190,7 @@ function renderDirListing({ pathnameValue, entries, style, customCss }) {
 
     h1 {
       margin-bottom: 0.25rem;
-      color: var(--text-bright);
+      color: var(--accent);
       font-family: var(--font-mono);
       font-size: 1.1rem;
       line-height: var(--line-height-tight);
@@ -188,6 +203,8 @@ function renderDirListing({ pathnameValue, entries, style, customCss }) {
       color: var(--text-muted);
       font-family: var(--font-mono);
       font-size: 0.9rem;
+      border-left: 2px solid var(--accent);
+      padding-left: 0.6rem;
     }
 
     .up {
@@ -195,10 +212,10 @@ function renderDirListing({ pathnameValue, entries, style, customCss }) {
       margin-bottom: 0.75rem;
       color: var(--accent);
       text-decoration: none;
-      border: 1px solid var(--border-strong);
+      border: 1px solid var(--accent);
       padding: 0.3rem 0.55rem;
       font-family: var(--font-mono);
-      transition: background-color 0.18s ease, color 0.18s ease;
+      transition: background-color 0.18s ease, color 0.18s ease, border-color 0.18s ease;
     }
 
     .up:hover {
@@ -221,7 +238,7 @@ function renderDirListing({ pathnameValue, entries, style, customCss }) {
       color: var(--text);
       border-bottom: 1px solid var(--border);
       font-family: var(--font-mono);
-      transition: background-color 0.18s ease, color 0.18s ease;
+      transition: background-color 0.18s ease, color 0.18s ease, box-shadow 0.18s ease;
     }
 
     li:last-child a {
@@ -231,6 +248,7 @@ function renderDirListing({ pathnameValue, entries, style, customCss }) {
     li a:hover {
       background-color: var(--bg-surface);
       color: var(--text-bright);
+      box-shadow: inset 3px 0 0 var(--accent);
     }
 
     .name {
@@ -241,10 +259,13 @@ function renderDirListing({ pathnameValue, entries, style, customCss }) {
     }
 
     .type {
-      color: var(--text-faint);
+      color: var(--accent);
       text-transform: uppercase;
       font-size: 0.72rem;
       letter-spacing: 0.07em;
+      padding: 0.12rem 0.35rem;
+      border: 1px solid var(--accent-soft);
+      background-color: var(--accent-soft);
     }
 
     @media (max-width: 768px) {
@@ -563,7 +584,7 @@ async function createSrvServer(options) {
 
     shuttingDown = true;
     process.stdout.write('\u001B[2K\r');
-    console.log(chalk.bgWhite.bold('[srv-it]') + ' shutting down...');
+    console.log(chalk.bgWhite.bold('\n[srv-it]') + ' shutting down...');
 
     try {
       await closeAll();

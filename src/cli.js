@@ -46,7 +46,7 @@ function getHelpText() {
     `  ${chalk.yellow('--cors')}                       Enable CORS`,
     `  ${chalk.yellow('--single')}                     SPA fallback to /index.html`,
     `  ${chalk.yellow('--no-dir-listing')}             Disable directory listing`,
-    `  ${chalk.yellow('--style <name>')}               Listing style preset: midnight | paper | neon`,
+    `  ${chalk.yellow('--style <midnight|paper>')}     Listing style preset`,
     `  ${chalk.yellow('--style-css <file>')}           Custom CSS file for listing page`,
     `  ${chalk.yellow('-c')}                           Create srv.config.json in served root if missing`,
     `  ${chalk.yellow('--config <file>')}              Read additional config JSON file`,
