@@ -207,7 +207,7 @@ async function run() {
 
   if (options.logLevel >= 1) {
     const lines = [
-      `${chalk.green.bold('srv is running')}`,
+      `${chalk.hex("#3b82f6").bold('srv-it is running')}`,
       '',
       `${chalk.bold('- Local:')}    ${url}`,
       `${chalk.bold('- Root:')}     ${options.root}`,

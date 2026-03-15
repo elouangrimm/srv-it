@@ -15,7 +15,7 @@ const srvLogger = {
   http: (...message) => console.info(chalk.bgBlue.bold(' HTTP '), ...message),
   info: (...message) => console.info(chalk.bgMagenta.bold(' INFO '), ...message),
   warn: (...message) => console.error(chalk.bgYellow.bold(' WARN '), ...message),
-  error: (...message) => console.error(chalk.bgRed.bold(' ERROR '), ...message),
+  error: (...message) => console.error(chalk.bgRed.bold(' ERRR '), ...message),
   log: console.log,
 };
 
@@ -290,6 +290,7 @@ async function createSrvServer(options) {
   const root = path.resolve(options.root);
   const compress = getCompressionMiddleware();
   const clients = new Set();
+  const sockets = new Set();
 
   let customCss = '';
   if (options.styleCss) {
@@ -327,6 +328,12 @@ async function createSrvServer(options) {
       try {
         stat = await fsp.stat(filePath);
       } catch (error) {
+        if (pathnameValue === '/sw.js' && error && error.code === 'ENOENT') {
+          // Browsers often probe /sw.js by default; treat missing file as a silent no-op.
+          res.statusCode = 204;
+          res.end();
+          return;
+        }
         if (options.single) {
           filePath = path.join(root, 'index.html');
           stat = await fsp.stat(filePath);
@@ -397,11 +404,15 @@ async function createSrvServer(options) {
       res.statusCode = 500;
       res.end('Internal server error');
       if (options.logLevel >= 1) {
-        srvLogger.error('[srv] request error:', error.message);
+        srvLogger.error('[srv-it] request error:', error.message);
       }
     } finally {
       if (!options.noRequestLogging) {
         const statusCode = res.statusCode;
+        const suppressRequestLog = pathnameValue === '/sw.js' && statusCode === 204;
+        if (suppressRequestLog) {
+          return;
+        }
         const elapsed = Date.now() - start;
         const sourceIp = (req.socket.remoteAddress || '-').replace('::ffff:', '');
         const now = new Date();
@@ -432,7 +443,7 @@ async function createSrvServer(options) {
         res.statusCode = 500;
         res.end('Internal server error');
         if (options.logLevel >= 1) {
-          srvLogger.error('[srv] handler error:', error.message);
+          srvLogger.error('[srv-it] handler error:', error.message);
         }
       });
     });
@@ -442,11 +453,16 @@ async function createSrvServer(options) {
         res.statusCode = 500;
         res.end('Internal server error');
         if (options.logLevel >= 1) {
-          srvLogger.error('[srv] handler error:', error.message);
+          srvLogger.error('[srv-it] handler error:', error.message);
         }
       });
     });
   }
+
+  server.on('connection', (socket) => {
+    sockets.add(socket);
+    socket.on('close', () => sockets.delete(socket));
+  });
 
   const wss = new WebSocketServer({ server, path: '/__srv_ws' });
   wss.on('connection', (socket) => {
@@ -486,7 +502,7 @@ async function createSrvServer(options) {
       }
     }
     if (options.logLevel >= 2) {
-      srvLogger.info(`[srv] ${isCss ? 'css refresh' : 'reload'}: ${changePath}`);
+      srvLogger.info(`[srv-it] ${isCss ? 'css refresh' : 'reload'}: ${changePath}`);
     }
   };
 
@@ -499,27 +515,66 @@ async function createSrvServer(options) {
     if (error && error.code === 'ENOSPC') {
       liveReloadEnabled = false;
       await closeWatcher();
-      srvLogger.error('[srv] live reload disabled: file watcher limit reached (ENOSPC).');
-      srvLogger.warn('[srv] use --ignore to exclude noisy paths, or raise inotify limits on Linux.');
+      srvLogger.error('[srv-it] live reload disabled: file watcher limit reached (ENOSPC).');
+      srvLogger.warn('[srv-it] use --ignore to exclude noisy paths, or raise inotify limits on Linux.');
       return;
     }
 
     if (options.logLevel >= 1) {
-      srvLogger.error(`[srv] watcher error: ${error.message}`);
+      srvLogger.error(`[srv-it] watcher error: ${error.message}`);
     }
   });
 
+  let closingPromise;
   const closeAll = async () => {
-    await closeWatcher();
-    wss.close();
-    await new Promise((resolve) => server.close(resolve));
+    if (closingPromise) {
+      return closingPromise;
+    }
+
+    closingPromise = (async () => {
+      await closeWatcher();
+
+      for (const client of clients) {
+        try {
+          client.terminate();
+        } catch (_error) {
+          // Ignore client termination errors during shutdown.
+        }
+      }
+
+      await new Promise((resolve) => wss.close(resolve));
+
+      for (const socket of sockets) {
+        socket.destroy();
+      }
+
+      await new Promise((resolve) => server.close(resolve));
+    })();
+
+    return closingPromise;
   };
 
-  process.on('SIGINT', async () => {
-    srvLogger.info('\n[srv] shutting down...');
-    await closeAll();
-    process.exit(0);
-  });
+  let shuttingDown = false;
+  const onSigint = async () => {
+    if (shuttingDown) {
+      process.exit(130);
+      return;
+    }
+
+    shuttingDown = true;
+    process.stdout.write('\u001B[2K\r');
+    console.log(chalk.bgWhite.bold('[srv-it]') + ' shutting down...');
+
+    try {
+      await closeAll();
+      process.exit(0);
+    } catch (error) {
+      srvLogger.error('[srv-it] shutdown error:', error.message);
+      process.exit(1);
+    }
+  };
+
+  process.once('SIGINT', onSigint);
 
   await new Promise((resolve, reject) => {
     server.once('error', reject);
